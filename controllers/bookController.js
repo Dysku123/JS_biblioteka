@@ -1,0 +1,143 @@
+const {
+  addNewBook,
+  getAllBooks,
+  getAvailableBooks,
+  getBookByTitle,
+  getCollectionByAuthor,
+  getCollectionByCategory,
+  getCollectionByPublishedDate,
+  modifyBook,
+  processBorrowing
+} = require("../services/BookService");
+
+const addBook = async (req, res, next) => {
+  try {
+    const { title, author, category, publishedDate, pages, totalCopies } =
+      req.body;
+
+    await addNewBook(
+      title,
+      author,
+      category,
+      publishedDate,
+      pages,
+      totalCopies,
+    );
+
+    return res.status(201).json({
+      message: "utworzono ksiązkę lub zwiększono jej stan",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const showAllBooks = async (req, res, next) => {
+  try {
+    const books = await getAllBooks();
+    return res.status(200).json({
+      books,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const showAvailableBooks = async (req, res, next) => {
+  try {
+    const availableBooks = await getAvailableBooks();
+    return res.status(200).json({
+      books: availableBooks,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const showBookByTitle = async (req, res, next) => {
+  const title = req.params.title; // łapie nam w locie title z url, bo jest tam :title, i przypisuje do zmiennej title
+  try {
+    const book = await getBookByTitle(title);
+    return res.status(200).json({
+      book,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const showCollectionByAuthor = async (req, res, next) => {
+  const author = req.params.author;
+  try {
+    const books = await getCollectionByAuthor(author);
+    return res.status(200).json({
+      books,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const showCollectionByCategory = async (req, res, next) => {
+  const category = req.params.category;
+  try {
+    const books = await getCollectionByCategory(category);
+    return res.status(200).json({
+      books,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const showCollectionByPublishedDate = async (req, res, next) => {
+  const publishedDate = req.params.publishedDate;
+  try {
+    const books = await getCollectionByPublishedDate(publishedDate);
+    return res.status(200).json({
+      books,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const editBookDetails = async (req, res, next) => {
+  const title = req.params.title;
+  const updatedData = req.body;
+  try {
+    await modifyBook(title, updatedData);
+    return res.status(200).json({
+      message: "Zaktualizowano dane książk",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const borrowBook = async (req, res, next) =>{
+    const title = req.params.title;
+    const amount = req.body.amount;
+    const userID = req.user.userId;
+    try{
+        const dueDate = await processBorrowing(title, amount, userID);
+        return res.status(200).json({
+            message: "poprawnie wypożyczono książke",
+            dueDate: dueDate
+        });
+    }catch(err){
+        next(err);
+    }
+};
+
+module.exports = {
+  addBook,
+  showAllBooks,
+  showAvailableBooks,
+  showBookByTitle,
+  showCollectionByAuthor,
+  showCollectionByCategory,
+  showCollectionByPublishedDate,
+  editBookDetails,
+  borrowBook
+};

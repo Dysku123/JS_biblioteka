@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test Logowania</title>
+  </head>
+  <body>
+    <h2>Panel Logowania</h2>
+    <form id="login-form">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Hasło" required />
+      <button type="submit">Zaloguj</button>
+    </form>
+
+    <form id="register-form">
+      <input type="email" name="email" placeholder="email" required />
+      <input type="password" name="password" placeholder="hasło" required />
+      <button type="submit">zarejestruj</button>
+    </form>
+    <button id="fetch-profile">Pobierz profil</button>
+
+    <button id="logout-btn">Wyloguj</button>
+    <div style="margin-top: 20px;">
+      <input type="email" id="new-email" placeholder="Nowy email" required />
+      <button id="update-email-btn">Zmień email</button>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
