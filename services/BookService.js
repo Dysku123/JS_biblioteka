@@ -12,7 +12,11 @@ const {
   borrowABook,
 } = require("../models/bookModel");
 
-const { registerBorrowing } = require("../models/borrowingModel");
+const {
+  registerBorrowing,
+  registerReturn,
+  findBorrowedBooks,
+} = require("../models/borrowingModel");
 
 const addNewBook = async (
   title,
