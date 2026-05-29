@@ -1,6 +1,6 @@
 const { borrowingsCollection } = require("../config/db");
 
-const registerBorrowing = async (userId, title, dueDate, borrowedAmount) => {
+const registerBorrowing = async (userId, title, dueDate, borrowedAmount, session) => {
   await borrowingsCollection.insertOne({
     userId,
     title,
@@ -9,14 +9,14 @@ const registerBorrowing = async (userId, title, dueDate, borrowedAmount) => {
     returnedAt: null,
     borrowedAmount,
     returnedAmount: 0,
-  });
+  }, { session: session });
 };
 
 const fetchBorrowingsByUserId = async (userId) => {
   return await borrowingsCollection.find({ userId }).toArray();
 };
 
-const registerReturn = async (userId, title) => {
+const registerReturn = async (userId, title, session) => {
   await borrowingsCollection.updateOne(
     {
       userId: userId,
@@ -25,21 +25,31 @@ const registerReturn = async (userId, title) => {
       returnedAt: null,
     },
     { $inc: { returnedAmount: 1 } },
+    { session: session }
   );
 };
 
-const findBorrowedBooks = async (userId, title) => {
+const findBorrowedBooks = async (userId, title, session) => {
   return await borrowingsCollection.findOne(
     {
     userId: userId,
     title: title,
     returnedAt: null
-  });
+  }, { session: session });
 };
+
+const closeBorrowing = async(userId, title, session)=>{
+  await borrowingsCollection.updateOne(
+    {userId:userId, title:title, returnedAt:null},
+    {$set: {returnedAt: new Date()}},
+    {session: session}
+  );
+}
 
 module.exports = {
   registerBorrowing,
   fetchBorrowingsByUserId,
   registerReturn,
-  findBorrowedBooks
+  findBorrowedBooks,
+  closeBorrowing
 };

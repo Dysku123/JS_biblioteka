@@ -7,19 +7,30 @@ const login = async (req, res, next) => {
   const user_password = req.body.password;
   try {
     const user = await loginUser(user_email, user_password);
-    const token = jwt.sign({ userId: user._id, role: user.role }, SECRET_KEY, {expiresIn: "1h"});
-    res.status(200).json({
+    const token = jwt.sign({ userId: user._id, role: user.role }, SECRET_KEY, {
+      expiresIn: "15m",
+    });
+    const refreshToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      SECRET_KEY,
+      { expiresIn: "7d" },
+    );
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+    });
+
+    return res.status(200).json({
       message: "zalogowano pomyslnie",
       token: token,
     });
   } catch (err) {
-    if(err.message === "Nieprawidłowe dane logowania"){
+    if (err.message === "Nieprawidłowe dane logowania") {
       return res.status(401).json({
-        message: err.message
+        message: err.message,
       });
     }
     next(err);
-  } 
+  }
 };
 
 const register = async (req, res, next) => {

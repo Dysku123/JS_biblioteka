@@ -19,8 +19,8 @@ const createBook = async (
   });
 };
 
-const findBookByTitle = async (title) => {
-  return await booksCollection.findOne({ title });
+const findBookByTitle = async (title, session) => {
+  return await booksCollection.findOne({ title }, { session });
 };
 
 const findCollectionByAuthor = async (author) => {
@@ -41,50 +41,63 @@ const increaseBookStock = async (title, amount) => {
       title: title,
     },
     {
-        $inc: {totalCopies: amount, availableCopies: amount}
-    }
+      $inc: { totalCopies: amount, availableCopies: amount },
+    },
   );
 };
 
-const fetchAllBooks = async() =>{
-  return await booksCollection.find().toArray();
-}
+const fetchAllBooks = async (limit, skip) => {
+  return await booksCollection.find().skip(skip).limit(limit).toArray();
+};
 
-const fetchAvailableBooks = async()=>{
-  return await booksCollection.find(
-   { availableCopies: { $gt: 0 } }).toArray();
-}
+const fetchAvailableBooks = async () => {
+  return await booksCollection.find({ availableCopies: { $gt: 0 } }).toArray();
+};
 
-const updateBookDetails = async (title, updatedData) =>{
+const updateBookDetails = async (title, updatedData) => {
   await booksCollection.updateOne(
-    {title: title},
+    { title: title },
     {
-      $set: updatedData
-    }
-  )
-}
-
-const deleteBookByTitle = async (title) =>{
-  await booksCollection.deleteOne(
-    {title:title});
-};
-
-const decreaseBookStock = async (title, amount) =>{
-  await booksCollection.updateOne(
-    {title:title},
-    { $inc: { totalCopies: -amount, availableCopies: -amount } });
-};
-
-const borrowABook = async (title, amount)=>{
-  const result = await booksCollection.updateOne( //zapisujemy do zmiennej, zeby móc w tym grzebać
-    {title:title,
-      availableCopies: { $gte: amount }
+      $set: updatedData,
     },
-    {$inc: {availableCopies: -amount}});
-    if(result.modifiedCount === 0){
-      throw new Error("Nie można wypożyczyć książki, brak wystarczającej ilości egzemplarzy");// sprawdzamy metadane zapytania, zeby sprawdzic, czy cokolwiek zmieniliśmy
-    }
-}
+  );
+};
+
+const deleteBookByTitle = async (title) => {
+  await booksCollection.deleteOne({ title: title });
+};
+
+const decreaseBookStock = async (title, amount) => {
+  await booksCollection.updateOne(
+    { title: title },
+    { $inc: { totalCopies: -amount, availableCopies: -amount } },
+  );
+};
+
+const borrowABook = async (title, amount, session) => {
+  const result = await booksCollection.updateOne(
+    //zapisujemy do zmiennej, zeby móc w tym grzebać
+    { title: title, availableCopies: { $gte: amount } },
+    { $inc: { availableCopies: -amount } },
+    { session: session },
+  );
+  if (result.modifiedCount === 0) {
+    throw new Error(
+      "Nie można wypożyczyć książki, brak wystarczającej ilości egzemplarzy",
+    ); // sprawdzamy metadane zapytania, zeby sprawdzic, czy cokolwiek zmieniliśmy
+  }
+};
+
+const returnBookToStock = async (title, session) => {
+  const result = await booksCollection.updateOne(
+    { title: title, $expr: { $lt: ["$availableCopies", "$totalCopies"] } },
+    { $inc: { availableCopies: 1 } },
+    { session: session },
+  );
+  if (result.modifiedCount === 0) {
+    throw new Error("Stan magazynowy jest już pełny");
+  }
+};
 
 module.exports = {
   createBook,
@@ -98,5 +111,6 @@ module.exports = {
   updateBookDetails,
   deleteBookByTitle,
   decreaseBookStock,
-  borrowABook
+  borrowABook,
+  returnBookToStock,
 };

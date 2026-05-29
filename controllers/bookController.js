@@ -7,7 +7,8 @@ const {
   getCollectionByCategory,
   getCollectionByPublishedDate,
   modifyBook,
-  processBorrowing
+  processBorrowing,
+  processReturn
 } = require("../services/BookService");
 
 const addBook = async (req, res, next) => {
@@ -34,7 +35,10 @@ const addBook = async (req, res, next) => {
 
 const showAllBooks = async (req, res, next) => {
   try {
-    const books = await getAllBooks();
+    const { page = 1, limit = 10 } = req.query;
+    
+    const books = await getAllBooks(page, limit);
+    
     return res.status(200).json({
       books,
     });
@@ -130,6 +134,19 @@ const borrowBook = async (req, res, next) =>{
     }
 };
 
+const returnBook = async (req, res, next) =>{
+  const title = req.params.title;
+  const userID = req.user.userId;
+  try{
+    await processReturn(userID, title);
+    return res.status(200).json({
+      message: "poprawnie zwrócono książke"
+    });
+  }catch(err){
+    next(err);
+  }
+};
+
 module.exports = {
   addBook,
   showAllBooks,
@@ -139,5 +156,6 @@ module.exports = {
   showCollectionByCategory,
   showCollectionByPublishedDate,
   editBookDetails,
-  borrowBook
+  borrowBook,
+  returnBook
 };

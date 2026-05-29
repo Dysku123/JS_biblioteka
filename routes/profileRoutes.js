@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { getProfile, updateEmail, deleteProfile } = require("../controllers/profileController");
 const {getMyBooks} = require("../controllers/profileController");
-const verifyToken = require("../middleware/auth");
+const {verifyToken} = require("../middleware/auth");
 
 router.get("/", verifyToken, getProfile);
 

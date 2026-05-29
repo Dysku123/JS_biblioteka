@@ -21,4 +21,6 @@ module.exports = {
   poloczZBaza,
   usersCollection,
   booksCollection,
+  borrowingsCollection,
+  client,
 };
