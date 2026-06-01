@@ -7,7 +7,14 @@ const app = express(); // express to metoda, trzeba ją wywołać
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const bookRoutes = require("./routes/bookRoutes");
-app.use(cors()); //tak samo jak jsona, to musimy uzyc
+const cookieParser = require("cookie-parser");
+app.use(
+  cors({
+    origin: "http://127.0.0.1:3001",
+    credentials: true,
+  }),
+);
+app.use(cookieParser());
 app.use(express.json()); //dodajemy tłumaczenie jsona dla expresu, bez tego nic nie będzie działać
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
@@ -31,7 +38,7 @@ app.get("/", (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(`error next ${err.message}`);
-  res.status(500).json({
-    message: "coś poszło nie tak",
+  res.status(err.statusCode || 500).json({
+    message: err.message,
   });
 });

@@ -8,7 +8,9 @@ const {
   getCollectionByPublishedDate,
   modifyBook,
   processBorrowing,
-  processReturn
+  processReturn,
+  removeBook,
+  getAllBorrowings,
 } = require("../services/BookService");
 
 const addBook = async (req, res, next) => {
@@ -33,12 +35,24 @@ const addBook = async (req, res, next) => {
   }
 };
 
+const deleteBook = async (req, res, next) => {
+  const title = req.params.title;
+  try {
+    await removeBook(title);
+    return res.status(200).json({
+      message: "książka została usunięta",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const showAllBooks = async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    
+
     const books = await getAllBooks(page, limit);
-    
+
     return res.status(200).json({
       books,
     });
@@ -119,30 +133,48 @@ const editBookDetails = async (req, res, next) => {
   }
 };
 
-const borrowBook = async (req, res, next) =>{
-    const title = req.params.title;
-    const amount = req.body.amount;
-    const userID = req.user.userId;
-    try{
-        const dueDate = await processBorrowing(title, amount, userID);
-        return res.status(200).json({
-            message: "poprawnie wypożyczono książke",
-            dueDate: dueDate
-        });
-    }catch(err){
-        next(err);
-    }
+const borrowBook = async (req, res, next) => {
+  const title = req.params.title;
+  const amount = req.body.amount;
+  const userID = req.user.userId;
+  try {
+    const dueDate = await processBorrowing(title, amount, userID);
+    return res.status(200).json({
+      message: "poprawnie wypożyczono książke",
+      dueDate: dueDate,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-const returnBook = async (req, res, next) =>{
+const returnBook = async (req, res, next) => {
   const title = req.params.title;
   const userID = req.user.userId;
-  try{
-    await processReturn(userID, title);
+  try {
+    const isLate = await processReturn(userID, title);
+    if (isLate) {
+      return res.status(200).json({
+        message: "poprawnie zwrócono książke, ale jest spóźniona",
+      });
+    } else {
+      return res.status(200).json({
+        message: "poprawnie zwrócono książke",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+const returnallBorrowings = async (req, res, next) => {
+  const { page = 1, limit = 10 } = req.query;
+  try {
+    const borrowings = await getAllBorrowings(page, limit);
     return res.status(200).json({
-      message: "poprawnie zwrócono książke"
+      borrowings,
     });
-  }catch(err){
+  } catch (err) {
     next(err);
   }
 };
@@ -157,5 +189,7 @@ module.exports = {
   showCollectionByPublishedDate,
   editBookDetails,
   borrowBook,
-  returnBook
+  returnBook,
+  returnallBorrowings,
+  deleteBook,
 };

@@ -11,6 +11,7 @@ const handleLogin = async (event) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
+      credentials: "include",
     });
 
     const data = await response.json();
@@ -40,6 +41,7 @@ const handleRegister = async (event) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
+      credentials: "include",
     });
     const data = await response.json();
     console.log(data);
