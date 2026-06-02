@@ -1,18 +1,9 @@
 const {
-  findUserByEmail,
-  createUser,
-  findUserById,
-  deleteUserById,
-  updateEmailById,
-  findEmailDuplicate,
-} = require("../models/userModel");
-
-const {
   getUserProfileBooks,
   getUserProfileData,
   removeUserProfile,
   changeUserEmail,
-} = require("../services/profileService");
+} = require("../services/ProfileService");
 
 const getProfile = async (req, res, next) => {
   try {

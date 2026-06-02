@@ -2,7 +2,8 @@ const { usersCollection } = require("../config/db");
 const { ObjectId } = require("mongodb");
 
 const findUserByEmail = async (email) => {
-  return await usersCollection.findOne({ email });
+  return await usersCollection.findOne(
+    { email, isActive: true });
 };
 
 const registerEmailDuplicate = async (email) => {
@@ -45,6 +46,7 @@ const findUserById = async (id, includePassword = false) => {
 };
 
 const deleteUserById = async (id) => {
+  const deletedemail = `deleted_${Date.now()}@deleted.com`;
   await usersCollection.updateOne(
     {
       _id: new ObjectId(id),
@@ -53,6 +55,7 @@ const deleteUserById = async (id) => {
       $set: {
         isActive: false,
         deletedAt: new Date(),
+        email: deletedemail
       },
     },
   );

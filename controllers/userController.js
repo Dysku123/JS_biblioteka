@@ -1,17 +1,19 @@
-const { returnAllUsers, updateUserRole } = require("../services/UserService");
+const { returnAllUsers, modifyUserRole, removeUser } = require("../services/UserService");
+const { findUserById } = require("../models/userModel");
+const AppError = require("../errors/AppError");
 
 const getAllUsers = async (req, res, next) => {
   try {
     const user = await returnAllUsers();
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     next(err);
   }
 };
 
-const changeUserRole = async (req, res, next) => {
+const updateUserRole = async (req, res, next) => {
   const allowedRoles = ["user", "admin", "librarian"];
-  const { userId } = req.params; // Pobieramy ID z adresu URL (zgodnie z routingiem)
+  const { userId } = req.params;
   const { newRole } = req.body;
 
   if (!allowedRoles.includes(newRole)) {
@@ -19,7 +21,7 @@ const changeUserRole = async (req, res, next) => {
   }
 
   try {
-    const user = await updateUserRole(userId, newRole);
+    const user = await modifyUserRole(userId, newRole);
     if (!user) {
       return next(new AppError("użytkownik nie istnieje", 404));
     }
@@ -29,18 +31,20 @@ const changeUserRole = async (req, res, next) => {
   }
 };
 
-const deleteUseID = async (req, res, next) => {
+const deleteUser = async (req, res, next) => {
   const { userId } = req.params;
   const profileId = req.user.userId;
+
   if (userId === profileId) {
     return next(new AppError("nie można usunąć własnego konta", 403));
   }
+
   try {
-    const userUSer = await finduserById(userId);
+    const userUSer = await findUserById(userId);
     if (!userUSer) {
       return next(new AppError("użytkownik nie istnieje", 404));
     }
-    await deleteUser(userId);
+    await removeUser(userId);
     res.status(200).json({ message: "użytkownik został usunięty" });
   } catch (err) {
     next(err);
@@ -49,6 +53,6 @@ const deleteUseID = async (req, res, next) => {
 
 module.exports = {
   getAllUsers,
-  changeUserRole,
-  deleteUserID,
+  updateUserRole,
+  deleteUser,
 };

@@ -7,6 +7,8 @@ const app = express(); // express to metoda, trzeba ją wywołać
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const bookRoutes = require("./routes/bookRoutes");
+const userRoutes = require("./routes/userRoutes");
+
 const cookieParser = require("cookie-parser");
 app.use(
   cors({
@@ -19,6 +21,8 @@ app.use(express.json()); //dodajemy tłumaczenie jsona dla expresu, bez tego nic
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/book", bookRoutes);
+app.use("/users", userRoutes);
+
 
 poloczZBaza()
   .then(() => {

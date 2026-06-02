@@ -5,6 +5,7 @@ const {
   login,
   register,
   refreshToken,
+  logout
 } = require("../controllers/authController");
 const validateBody = require("../middleware/validateBody");
 const rateLimit = require("express-rate-limit");
@@ -31,5 +32,6 @@ const loginSchema = Joi.object({
 router.post("/login", loginLimiter, validateBody(loginSchema), login);
 router.post("/register", validateBody(registerSchema), register);
 router.post("/refresh-token", refreshToken);
+router.post("/logout", logout);
 
 module.exports = router;

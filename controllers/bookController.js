@@ -122,11 +122,22 @@ const showCollectionByPublishedDate = async (req, res, next) => {
 
 const editBookDetails = async (req, res, next) => {
   const title = req.params.title;
-  const updatedData = req.body;
+  const { author, category, publishedDate, pages } = req.body;
+  const safeData = {};
+
+  if (author) safeData.author = author;
+  if (category) safeData.category = category;
+  if (publishedDate) safeData.publishedDate = publishedDate;
+  if (pages) safeData.pages = pages;
+
+  if (Object.keys(safeData).length === 0) {
+    return next(new AppError("Brak poprawnych danych do edycji", 400));// jeśli safeData jest puste, to znaczy że nie ma żadnych danych do edycji, więc zwracamy błąd
+  }
+
   try {
-    await modifyBook(title, updatedData);
+    await modifyBook(title, safeData);
     return res.status(200).json({
-      message: "Zaktualizowano dane książk",
+      message: "Zaktualizowano dane książki",
     });
   } catch (err) {
     next(err);

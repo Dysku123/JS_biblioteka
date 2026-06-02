@@ -11,16 +11,16 @@ const returnAllUsers = async () => {
   return await getAllUsers();
 };
 
-const updateUserRole = async (id, newRole) => {
+const modifyUserRole = async (id, newRole) => {
   return await changeUserRole(id, newRole);
 };
 
-const deleteUser = async (id) => {
+const removeUser = async (id) => {
   await deleteUserById(id);
-}
+};
 
 module.exports = {
   returnAllUsers,
-  updateUserRole,
-  deleteUser,
+  modifyUserRole,
+  removeUser,
 };

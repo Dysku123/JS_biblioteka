@@ -14,7 +14,7 @@ async function poloczZBaza() {
     await usersCollection.createIndex({ email: 1 }, { unique: true });
     console.log("Indeks unikalności dla e-maila został ustawiony.");
   } catch (err) {
-    console.log("nie dziala db", err);
+    throw new Error(`Nie można połączyć się z bazą danych: ${err.message}`);
   }
 }
 module.exports = {

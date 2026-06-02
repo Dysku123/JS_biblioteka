@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.SECRET_KEY;
+const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 const { registerUser, loginUser } = require("../services/AuthService");
 
 const login = async (req, res, next) => {
@@ -21,17 +22,23 @@ const login = async (req, res, next) => {
 
     const refreshToken = jwt.sign(
       { userId: user._id, role: user.role },
-      SECRET_KEY,
+      REFRESH_SECRET_KEY,
       { expiresIn: "7d" },
     );
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
+      secure: true, // Ustawienie secure na true wymaga HTTPS
+      sameSite: "strict", // Zapobiega wysyłaniu ciasteczka w żądaniach cross-site
+    });
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
     });
 
     return res.status(200).json({
       message: "zalogowano pomyslnie",
-      token: token,
     });
   } catch (err) {
     if (err.message === "Nieprawidłowe dane logowania") {
@@ -86,14 +93,19 @@ const refreshToken = (req, res, next) => {
     });
   }
   try {
-    const decoded = jwt.verify(refreshToken, SECRET_KEY);
+    const decoded = jwt.verify(refreshToken, REFRESH_SECRET_KEY);
     const userId = decoded.userId;
     const role = decoded.role;
     const newToken = jwt.sign({ userId, role }, SECRET_KEY, {
       expiresIn: "15m",
     });
+    res.cookie("accessToken", newToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
     res.status(200).json({
-      token: newToken,
+      message: "Token odświeżony pomyślnie",
     });
   } catch (err) {
     return res.status(403).json({
@@ -102,8 +114,18 @@ const refreshToken = (req, res, next) => {
   }
 };
 
+const logout = (req, res, next) => {
+  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken");
+  res.status(200).json({
+    message: "Wylogowano pomyślnie",
+  });
+};
+
+
 module.exports = {
   login,
   register,
   refreshToken,
+  logout,
 };
