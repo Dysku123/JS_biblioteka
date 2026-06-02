@@ -29,7 +29,26 @@ const changeUserRole = async (req, res, next) => {
   }
 };
 
+const deleteUseID = async (req, res, next) => {
+  const { userId } = req.params;
+  const profileId = req.user.userId;
+  if (userId === profileId) {
+    return next(new AppError("nie można usunąć własnego konta", 403));
+  }
+  try {
+    const userUSer = await finduserById(userId);
+    if (!userUSer) {
+      return next(new AppError("użytkownik nie istnieje", 404));
+    }
+    await deleteUser(userId);
+    res.status(200).json({ message: "użytkownik został usunięty" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getAllUsers,
   changeUserRole,
+  deleteUserID,
 };
