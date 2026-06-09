@@ -50,8 +50,11 @@ const getAllBooks = async (page, limit) => {
   return await fetchAllBooks(parsedLimit, skip);
 };
 
-const getAvailableBooks = async () => {
-  return await fetchAvailableBooks();
+const getAvailableBooks = async (page, limit) => {
+  const parsedPage = Math.max(1, parseInt(page) || 1);
+  const parsedLimit = Math.max(1, parseInt(limit) || 10);
+  const skip = (parsedPage - 1) * parsedLimit;
+  return await fetchAvailableBooks(parsedLimit, skip);
 };
 
 const getBookById = async (id) => {

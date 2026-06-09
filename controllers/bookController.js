@@ -12,6 +12,9 @@ const {
   removeBook,
   getAllBorrowings,
 } = require("../services/BookService");
+const AppError = require("../errors/AppError");
+
+const { ObjectId } = require("mongodb");
 
 const addBook = async (req, res, next) => {
   try {
@@ -37,6 +40,9 @@ const addBook = async (req, res, next) => {
 
 const deleteBook = async (req, res, next) => {
   const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return next(new AppError("Nieprawidłowy ID", 400));
+  }
   try {
     await removeBook(id);
     return res.status(200).json({
@@ -63,7 +69,8 @@ const showAllBooks = async (req, res, next) => {
 
 const showAvailableBooks = async (req, res, next) => {
   try {
-    const availableBooks = await getAvailableBooks();
+    const { page = 1, limit = 10 } = req.query;
+    const availableBooks = await getAvailableBooks(page, limit);
     return res.status(200).json({
       books: availableBooks,
     });
@@ -74,6 +81,9 @@ const showAvailableBooks = async (req, res, next) => {
 
 const showBookById = async (req, res, next) => {
   const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return next(new AppError("Nieprawidłowy ID", 400));
+  }
   try {
     const book = await getBookById(id);
     return res.status(200).json({
@@ -122,6 +132,9 @@ const showCollectionByPublishedDate = async (req, res, next) => {
 
 const editBookDetails = async (req, res, next) => {
   const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return next(new AppError("Nieprawidłowy ID", 400));
+  }
   const { author, category, publishedDate, pages } = req.body;
   const safeData = {};
 
@@ -146,8 +159,14 @@ const editBookDetails = async (req, res, next) => {
 
 const borrowBook = async (req, res, next) => {
   const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return next(new AppError("Nieprawidłowy ID", 400));
+  }
   const amount = req.body.amount;
   const userID = req.user.userId;
+  if (!ObjectId.isValid(userID)) {
+    return next(new AppError("Nieprawidłowy ID użytkownika", 400));
+  }
   try {
     if (amount <= 0) {
       throw new AppError("Nie można wypożyczyć mniej niż 1 egzemplarz", 400);
@@ -164,6 +183,9 @@ const borrowBook = async (req, res, next) => {
 
 const returnBook = async (req, res, next) => {
   const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return next(new AppError("Nieprawidłowy ID", 400));
+  }
   const userID = req.user.userId;
   try {
     const isLate = await processReturn(userID, id);
@@ -197,7 +219,7 @@ module.exports = {
   addBook,
   showAllBooks,
   showAvailableBooks,
-  showBookByTitle,
+  showBookById,
   showCollectionByAuthor,
   showCollectionByCategory,
   showCollectionByPublishedDate,

@@ -19,6 +19,15 @@ const registerLimiter = rateLimit({
   },
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 10, 
+  message: {
+    message:
+      "Zbyt wiele prób logowania z tego adresu IP. Spróbuj ponownie za 15 minut.",
+  },
+});
+
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(7).required(),
@@ -29,7 +38,7 @@ const loginSchema = Joi.object({
   password: Joi.string().min(7).required(),
 });
 
-router.post("/login", validateBody(loginSchema), login);
+router.post("/login", loginLimiter, validateBody(loginSchema), login);
 router.post("/register", registerLimiter, validateBody(registerSchema), register);
 router.post("/refresh-token", refreshToken);
 router.post("/logout", logout);

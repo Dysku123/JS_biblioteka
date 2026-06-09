@@ -71,9 +71,11 @@ const fetchAllBooks = async (limit, skip) => {
     .toArray();
 };
 
-const fetchAvailableBooks = async () => {
+const fetchAvailableBooks = async (limit, skip) => {
   return await booksCollection
     .find({ availableCopies: { $gt: 0 }, isDeleted: false })
+    .skip(skip)
+    .limit(limit)
     .toArray();
 };
 

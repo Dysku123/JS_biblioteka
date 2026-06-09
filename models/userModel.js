@@ -1,5 +1,6 @@
 const { usersCollection } = require("../config/db");
 const { ObjectId } = require("mongodb");
+const AppError = require("../errors/AppError");
 
 const findUserByEmail = async (email) => {
   return await usersCollection.findOne(
@@ -26,8 +27,8 @@ const createUser = async (email, password, role) => {
   });
 };
 
-const changeUserRole = async (id, newRole) =>{
-  await usersCollection.updateOne(
+const changeUserRole = async (id, newRole) => {
+  const result = await usersCollection.updateOne(
     {
       _id: new ObjectId(id),
     },
@@ -37,7 +38,13 @@ const changeUserRole = async (id, newRole) =>{
       },
     },
   );
-}
+
+  if (result.matchedCount === 0) {
+    throw new AppError("Nie znaleziono użytkownika", 404);
+  }
+
+  return result;
+};
 
 const findUserById = async (id, includePassword = false) => {
   const options = includePassword ? {} : { projection: { password: 0 } };
