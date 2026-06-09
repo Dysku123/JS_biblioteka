@@ -168,7 +168,7 @@ const borrowBook = async (req, res, next) => {
     return next(new AppError("Nieprawidłowy ID użytkownika", 400));
   }
   try {
-    if (amount <= 0) {
+    if (!Number.isInteger(amount) || amount < 1) {
       throw new AppError("Nie można wypożyczyć mniej niż 1 egzemplarz", 400);
     }
     const dueDate = await processBorrowing(id, amount, userID);

@@ -9,8 +9,6 @@ const verifyToken = (req, res, next) => {
     });
   }
 
-  const slicedFrontToken = frontToken;
-
   try {
     const verifiedToken = jwt.verify(slicedFrontToken, SECRET_KEY);
     req.user = verifiedToken;

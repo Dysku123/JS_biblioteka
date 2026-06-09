@@ -76,7 +76,7 @@ const getCollectionByPublishedDate = async (publishedDate) => {
 const removeBook = async (id) => {
   const book = await findBookById(id);
   if (!book) {
-    throw new Error("książka nie istnieje");
+    throw new AppError("książka nie istnieje", 404);
   }
   await deleteBookById(id);
 };
@@ -84,7 +84,7 @@ const removeBook = async (id) => {
 const modifyBook = async (id, updatedData) => {
   const book = await findBookById(id);
   if (!book) {
-    throw new Error("książka nie istnieje");
+    throw new AppError("książka nie istnieje", 404);
   }
   await updateBookDetailsById(id, updatedData);
 };
