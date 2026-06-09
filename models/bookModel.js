@@ -1,5 +1,6 @@
 const { booksCollection } = require("../config/db");
 const { ObjectId } = require("mongodb"); // Importujemy klasę do obsługi systemowych ID
+const AppError = require("../errors/AppError");
 
 const createBook = async (
   title,
@@ -109,8 +110,9 @@ const borrowABookById = async (id, amount, session) => {
     { session: session },
   );
   if (result.modifiedCount === 0) {
-    throw new Error(
+    throw new AppError(
       "Nie można wypożyczyć książki, brak wystarczającej ilości egzemplarzy",
+      400
     );
   }
 };
@@ -126,7 +128,7 @@ const returnBookToStockById = async (id, session) => {
     { session: session },
   );
   if (result.modifiedCount === 0) {
-    throw new Error("Stan magazynowy jest już pełny");
+    throw new AppError("Stan magazynowy jest już pełny", 400);
   }
 };
 

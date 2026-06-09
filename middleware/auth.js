@@ -10,7 +10,7 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const verifiedToken = jwt.verify(slicedFrontToken, SECRET_KEY);
+    const verifiedToken = jwt.verify(frontToken, SECRET_KEY);
     req.user = verifiedToken;
     next();
   } catch (err) {

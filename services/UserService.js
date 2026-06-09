@@ -1,8 +1,5 @@
 const {
-  findUserById,
   deleteUserById,
-  updateEmailById,
-  findEmailDuplicate,
   getAllUsers,
   changeUserRole,
 } = require("../models/userModel");

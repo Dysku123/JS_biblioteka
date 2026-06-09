@@ -4,7 +4,7 @@ const {
   addBook,
   showAllBooks,
   showAvailableBooks,
-  showBookByTitle,
+  showBookById,
   showCollectionByAuthor,
   showCollectionByCategory,
   showCollectionByPublishedDate,
@@ -36,6 +36,6 @@ router.get("/category/:category", showCollectionByCategory);
 router.get("/publishedDate/:publishedDate", showCollectionByPublishedDate);
 
 // 3. Ścieżka w pełni dynamiczna (catch-all) - ZAWSZE NA DOLE
-router.get("/:id", showBookByTitle);
+router.get("/:id", showBookById);
 
 module.exports = router;
