@@ -1,4 +1,5 @@
 const { booksCollection } = require("../config/db");
+const { ObjectId } = require("mongodb"); // Importujemy klasę do obsługi systemowych ID
 
 const createBook = async (
   title,
@@ -20,9 +21,18 @@ const createBook = async (
   });
 };
 
+// Zostawiamy do weryfikacji przy dodawaniu nowej książki
 const findBookByTitle = async (title, session) => {
   return await booksCollection.findOne(
     { title, isDeleted: false },
+    { session },
+  );
+};
+
+// NOWA FUNKCJA: Wyszukiwanie po systemowym ID
+const findBookById = async (id, session) => {
+  return await booksCollection.findOne(
+    { _id: new ObjectId(id), isDeleted: false },
     { session },
   );
 };
@@ -41,10 +51,10 @@ const findCollectionByPublishedDate = async (publishedDate) => {
     .toArray();
 };
 
-const increaseBookStock = async (title, amount) => {
+const increaseBookStockById = async (id, amount) => {
   await booksCollection.updateOne(
     {
-      title: title,
+      _id: new ObjectId(id),
       isDeleted: false,
     },
     {
@@ -67,32 +77,32 @@ const fetchAvailableBooks = async () => {
     .toArray();
 };
 
-const updateBookDetails = async (title, updatedData) => {
+const updateBookDetailsById = async (id, updatedData) => {
   await booksCollection.updateOne(
-    { title: title, isDeleted: false },
+    { _id: new ObjectId(id), isDeleted: false },
     {
       $set: updatedData,
     },
   );
 };
 
-const deleteBookByTitle = async (title) => {
+const deleteBookById = async (id) => {
   await booksCollection.updateOne(
-    { title: title, isDeleted: false },
+    { _id: new ObjectId(id), isDeleted: false },
     { $set: { isDeleted: true } },
   );
 };
 
-const decreaseBookStock = async (title, amount) => {
+const decreaseBookStockById = async (id, amount) => {
   await booksCollection.updateOne(
-    { title: title, isDeleted: false },
+    { _id: new ObjectId(id), isDeleted: false },
     { $inc: { totalCopies: -amount, availableCopies: -amount } },
   );
 };
 
-const borrowABook = async (title, amount, session) => {
+const borrowABookById = async (id, amount, session) => {
   const result = await booksCollection.updateOne(
-    { title: title, availableCopies: { $gte: amount }, isDeleted: false },
+    { _id: new ObjectId(id), availableCopies: { $gte: amount }, isDeleted: false },
     { $inc: { availableCopies: -amount } },
     { session: session },
   );
@@ -103,10 +113,10 @@ const borrowABook = async (title, amount, session) => {
   }
 };
 
-const returnBookToStock = async (title, session) => {
+const returnBookToStockById = async (id, session) => {
   const result = await booksCollection.updateOne(
     {
-      title: title,
+      _id: new ObjectId(id),
       $expr: { $lt: ["$availableCopies", "$totalCopies"] },
       isDeleted: false,
     },
@@ -121,15 +131,16 @@ const returnBookToStock = async (title, session) => {
 module.exports = {
   createBook,
   findBookByTitle,
+  findBookById,
   findCollectionByAuthor,
   findCollectionByCategory,
   findCollectionByPublishedDate,
-  increaseBookStock,
+  increaseBookStockById,
   fetchAllBooks,
   fetchAvailableBooks,
-  updateBookDetails,
-  deleteBookByTitle,
-  decreaseBookStock,
-  borrowABook,
-  returnBookToStock,
+  updateBookDetailsById,
+  deleteBookById,
+  decreaseBookStockById,
+  borrowABookById,
+  returnBookToStockById,
 };

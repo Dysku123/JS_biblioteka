@@ -2,7 +2,7 @@ const {
   addNewBook,
   getAllBooks,
   getAvailableBooks,
-  getBookByTitle,
+  getBookById,
   getCollectionByAuthor,
   getCollectionByCategory,
   getCollectionByPublishedDate,
@@ -36,9 +36,9 @@ const addBook = async (req, res, next) => {
 };
 
 const deleteBook = async (req, res, next) => {
-  const title = req.params.title;
+  const id = req.params.id;
   try {
-    await removeBook(title);
+    await removeBook(id);
     return res.status(200).json({
       message: "książka została usunięta",
     });
@@ -72,10 +72,10 @@ const showAvailableBooks = async (req, res, next) => {
   }
 };
 
-const showBookByTitle = async (req, res, next) => {
-  const title = req.params.title; // łapie nam w locie title z url, bo jest tam :title, i przypisuje do zmiennej title
+const showBookById = async (req, res, next) => {
+  const id = req.params.id;
   try {
-    const book = await getBookByTitle(title);
+    const book = await getBookById(id);
     return res.status(200).json({
       book,
     });
@@ -121,7 +121,7 @@ const showCollectionByPublishedDate = async (req, res, next) => {
 };
 
 const editBookDetails = async (req, res, next) => {
-  const title = req.params.title;
+  const id = req.params.id;
   const { author, category, publishedDate, pages } = req.body;
   const safeData = {};
 
@@ -131,11 +131,11 @@ const editBookDetails = async (req, res, next) => {
   if (pages) safeData.pages = pages;
 
   if (Object.keys(safeData).length === 0) {
-    return next(new AppError("Brak poprawnych danych do edycji", 400));// jeśli safeData jest puste, to znaczy że nie ma żadnych danych do edycji, więc zwracamy błąd
+    return next(new AppError("Brak poprawnych danych do edycji", 400)); // jeśli safeData jest puste, to znaczy że nie ma żadnych danych do edycji, więc zwracamy błąd
   }
 
   try {
-    await modifyBook(title, safeData);
+    await modifyBook(id, safeData);
     return res.status(200).json({
       message: "Zaktualizowano dane książki",
     });
@@ -145,11 +145,14 @@ const editBookDetails = async (req, res, next) => {
 };
 
 const borrowBook = async (req, res, next) => {
-  const title = req.params.title;
+  const id = req.params.id;
   const amount = req.body.amount;
   const userID = req.user.userId;
   try {
-    const dueDate = await processBorrowing(title, amount, userID);
+    if (amount <= 0) {
+      throw new AppError("Nie można wypożyczyć mniej niż 1 egzemplarz", 400);
+    }
+    const dueDate = await processBorrowing(id, amount, userID);
     return res.status(200).json({
       message: "poprawnie wypożyczono książke",
       dueDate: dueDate,
@@ -160,10 +163,10 @@ const borrowBook = async (req, res, next) => {
 };
 
 const returnBook = async (req, res, next) => {
-  const title = req.params.title;
+  const id = req.params.id;
   const userID = req.user.userId;
   try {
-    const isLate = await processReturn(userID, title);
+    const isLate = await processReturn(userID, id);
     if (isLate) {
       return res.status(200).json({
         message: "poprawnie zwrócono książke, ale jest spóźniona",

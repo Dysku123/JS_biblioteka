@@ -1,17 +1,18 @@
 const {
   createBook,
   findBookByTitle,
+  findBookById,
   findCollectionByAuthor,
   findCollectionByCategory,
   findCollectionByPublishedDate,
-  increaseBookStock,
+  increaseBookStockById,
   fetchAvailableBooks,
   fetchAllBooks,
-  updateBookDetails,
-  decreaseBookStock,
-  borrowABook,
-  returnBookToStock,
-  deleteBookByTitle,
+  updateBookDetailsById,
+  decreaseBookStockById,
+  borrowABookById,
+  returnBookToStockById,
+  deleteBookById,
 } = require("../models/bookModel");
 
 const {
@@ -24,7 +25,6 @@ const {
 } = require("../models/borrowingModel");
 
 const AppError = require("../errors/AppError");
-
 const { client } = require("../config/db");
 
 const addNewBook = async (
@@ -35,19 +35,18 @@ const addNewBook = async (
   pages,
   totalCopies,
 ) => {
+  // Tutaj nadal używamy title, bo sprawdzamy czy taki tekst (tytuł) już jest w bazie
   const book = await findBookByTitle(title);
   if (book) {
-    return await increaseBookStock(title, totalCopies);
+    return await increaseBookStockById(book._id, totalCopies);
   }
   await createBook(title, author, category, publishedDate, pages, totalCopies);
 };
 
 const getAllBooks = async (page, limit) => {
-  const parsedPage = parseInt(page);
-  const parsedLimit = parseInt(limit);
-
+  const parsedPage = Math.max(1, parseInt(page) || 1);
+  const parsedLimit = Math.max(1, parseInt(limit) || 10);
   const skip = (parsedPage - 1) * parsedLimit;
-
   return await fetchAllBooks(parsedLimit, skip);
 };
 
@@ -55,8 +54,8 @@ const getAvailableBooks = async () => {
   return await fetchAvailableBooks();
 };
 
-const getBookByTitle = async (title) => {
-  return await findBookByTitle(title);
+const getBookById = async (id) => {
+  return await findBookById(id);
 };
 
 const getCollectionByAuthor = async (author) => {
@@ -71,32 +70,30 @@ const getCollectionByPublishedDate = async (publishedDate) => {
   return await findCollectionByPublishedDate(publishedDate);
 };
 
-const removeBook = async (title) => {
-  const book = await findBookByTitle(title);
+const removeBook = async (id) => {
+  const book = await findBookById(id);
   if (!book) {
     throw new Error("książka nie istnieje");
   }
-  await deleteBookByTitle(title);
+  await deleteBookById(id);
 };
 
-const modifyBook = async (title, updatedData) => {
-  const book = await findBookByTitle(title);
+const modifyBook = async (id, updatedData) => {
+  const book = await findBookById(id);
   if (!book) {
     throw new Error("książka nie istnieje");
   }
-  await updateBookDetails(title, updatedData);
+  await updateBookDetailsById(id, updatedData);
 };
 
 const getAllBorrowings = async (page, limit) => {
-  const parsedPage = parseInt(page);
-  const parsedLimit = parseInt(limit);
-
+  const parsedPage = Math.max(1, parseInt(page) || 1);
+  const parsedLimit = Math.max(1, parseInt(limit) || 10);
   const skip = (parsedPage - 1) * parsedLimit;
-
   return await fetchAllBorrowings(parsedLimit, skip);
 };
 
-const processBorrowing = async (title, amount, userId) => {
+const processBorrowing = async (id, amount, userId) => {
   const hasOverdue = await hasOverdueBooks(userId);
   if (hasOverdue) {
     throw new AppError("nie można wypożyczyć książki, masz zaległe zwroty", 400);
@@ -104,7 +101,7 @@ const processBorrowing = async (title, amount, userId) => {
   const session = client.startSession();
   try {
     session.startTransaction();
-    const book = await findBookByTitle(title, session);
+    const book = await findBookById(id, session);
     if (!book) {
       throw new AppError("książka nie istnieje", 404);
     }
@@ -115,9 +112,9 @@ const processBorrowing = async (title, amount, userId) => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 30);
 
-    await borrowABook(title, amount, session);
-
-    await registerBorrowing(userId, title, dueDate, amount, session);
+    await borrowABookById(id, amount, session);
+    // Przekazujemy id książki zamiast tytułu
+    await registerBorrowing(userId, id, dueDate, amount, session);
 
     await session.commitTransaction();
     return dueDate;
@@ -129,17 +126,16 @@ const processBorrowing = async (title, amount, userId) => {
   }
 };
 
-const processReturn = async (userId, title) => {
+const processReturn = async (userId, id) => {
   const session = client.startSession();
   try {
     session.startTransaction();
 
-    const borrowedbooks = await findBorrowedBooks(userId, title, session);
+    const borrowedbooks = await findBorrowedBooks(userId, id, session);
     if (!borrowedbooks) {
       throw new AppError("nie ma takiego wypozyczenia", 404);
     }
 
-    // --- SPRAWDZANIE TERMINOWOŚCI ---
     const now = new Date();
     let isLate = false;
 
@@ -147,14 +143,13 @@ const processReturn = async (userId, title) => {
       isLate = true;
     }
 
-    await registerReturn(userId, title, session);
-    await returnBookToStock(title, session);
+    await registerReturn(userId, id, session);
+    await returnBookToStockById(id, session);
     if (borrowedbooks.returnedAmount + 1 === borrowedbooks.borrowedAmount) {
-      await closeBorrowing(userId, title, session);
+      await closeBorrowing(userId, id, session);
     }
     await session.commitTransaction();
 
-    // Zwracamy flagę, czy było opóźnienie
     return isLate;
   } catch (err) {
     await session.abortTransaction();
@@ -164,11 +159,12 @@ const processReturn = async (userId, title) => {
   }
 };
 
+// Zmieniono eksport getBookByTitle na getBookById
 module.exports = {
   addNewBook,
   getAllBooks,
   getAvailableBooks,
-  getBookByTitle,
+  getBookById,
   getCollectionByAuthor,
   getCollectionByCategory,
   getCollectionByPublishedDate,

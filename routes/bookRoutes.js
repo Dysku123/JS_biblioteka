@@ -18,14 +18,14 @@ const { verifyToken, isLibrarian, isAdmin } = require("../middleware/auth");
 
 // --- TRASY POST / PUT / DELETE ---
 router.post("/add", verifyToken, isLibrarian, addBook);
-router.put("/:title", verifyToken, isLibrarian, editBookDetails);
-router.delete("/:title", verifyToken, isLibrarian, deleteBook);
-router.post("/:title/borrow", verifyToken, borrowBook);
-router.post("/:title/return", verifyToken, returnBook);
+router.put("/:id", verifyToken, isLibrarian, editBookDetails);
+router.delete("/:id", verifyToken, isLibrarian, deleteBook);
+router.post("/:id/borrow", verifyToken, borrowBook);
+router.post("/:id/return", verifyToken, returnBook);
 
 // --- TRASY GET (Kolejność ma tu krytyczne znaczenie) ---
 
-// 1. Ścieżki w pełni statyczne (dokładne dopasowanie)
+// 1. Ścieżki w pełni statyczne
 router.get("/", showAllBooks);
 router.get("/available", showAvailableBooks);
 router.get("/borrowings", verifyToken, isLibrarian, returnallBorrowings);
@@ -35,7 +35,7 @@ router.get("/author/:author", showCollectionByAuthor);
 router.get("/category/:category", showCollectionByCategory);
 router.get("/publishedDate/:publishedDate", showCollectionByPublishedDate);
 
-// 3. Ścieżka w pełni dynamiczna (tzw. catch-all dla GET) - ZAWSZE NA DOLE
-router.get("/:title", showBookByTitle);
+// 3. Ścieżka w pełni dynamiczna (catch-all) - ZAWSZE NA DOLE
+router.get("/:id", showBookByTitle);
 
 module.exports = router;

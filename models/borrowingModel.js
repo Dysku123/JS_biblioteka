@@ -1,87 +1,84 @@
 const { borrowingsCollection } = require("../config/db");
+const { ObjectId } = require("mongodb");
 
-const registerBorrowing = async (
-  userId,
-  title,
-  dueDate,
-  borrowedAmount,
-  session,
-) => {
+const registerBorrowing = async (userId, bookId, dueDate, amount, session) => {
   await borrowingsCollection.insertOne(
     {
-      userId,
-      title,
+      userId: new ObjectId(userId),
+      bookId: new ObjectId(bookId), // Zmiana: przechowujemy bookId zamiast title
       borrowedAt: new Date(),
-      dueDate,
-      returnedAt: null,
-      borrowedAmount,
+      dueDate: dueDate,
+      borrowedAmount: amount,
       returnedAmount: 0,
+      isOpen: true,
     },
-    { session: session },
+    { session }
   );
 };
 
-const fetchBorrowingsByUserId = async (userId) => {
-  return await borrowingsCollection.find({ userId }).toArray();
-};
-
-const registerReturn = async (userId, title, session) => {
-  await borrowingsCollection.updateOne(
-    {
-      userId: userId,
-      title: title,
-      borrowedAmount: { $gt: 0 },
-      returnedAt: null,
-    },
-    { $inc: { returnedAmount: 1 } },
-    { session: session },
-  );
-};
-
-const findBorrowedBooks = async (userId, title, session) => {
+const findBorrowedBooks = async (userId, bookId, session) => {
   return await borrowingsCollection.findOne(
     {
-      userId: userId,
-      title: title,
-      returnedAt: null,
+      userId: new ObjectId(userId),
+      bookId: new ObjectId(bookId),
+      isOpen: true,
     },
-    { session: session },
+    { session }
   );
 };
 
-const closeBorrowing = async (userId, title, session) => {
+const registerReturn = async (userId, bookId, session) => {
   await borrowingsCollection.updateOne(
-    { userId: userId, title: title, returnedAt: null },
-    { $set: { returnedAt: new Date() } },
-    { session: session },
+    {
+      userId: new ObjectId(userId),
+      bookId: new ObjectId(bookId),
+      isOpen: true,
+    },
+    {
+      $inc: { returnedAmount: 1 },
+    },
+    { session }
+  );
+};
+
+const closeBorrowing = async (userId, bookId, session) => {
+  await borrowingsCollection.updateOne(
+    {
+      userId: new ObjectId(userId),
+      bookId: new ObjectId(bookId),
+      isOpen: true,
+    },
+    {
+      $set: { isOpen: false, closedAt: new Date() },
+    },
+    { session }
   );
 };
 
 const fetchAllBorrowings = async (limit, skip) => {
   return await borrowingsCollection
-    .find({
-      returnedAt: null,
-    })
+    .find({})
     .skip(skip)
     .limit(limit)
     .toArray();
 };
+
 const hasOverdueBooks = async (userId) => {
   const now = new Date();
-  const overdueBooks = await borrowingsCollection.findOne({
-    userId: userId,
-    returnedAt: null,
+  const overdue = await borrowingsCollection.findOne({
+    userId: new ObjectId(userId),
+    isOpen: true,
     dueDate: { $lt: now },
   });
-  return overdueBooks;
-}
+  // Zwracamy true jeśli znaleziono zaległe wypożyczenie, false w przeciwnym razie
+  return !!overdue; 
+};
 
 module.exports = {
   registerBorrowing,
-  fetchBorrowingsByUserId,
   registerReturn,
   findBorrowedBooks,
   closeBorrowing,
   fetchAllBorrowings,
-  hasOverdueBooks
+  hasOverdueBooks,
 };
