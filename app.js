@@ -1,149 +1,62 @@
-const form = document.querySelector("#login-form");
+import { renderHome } from "./front/views/home.js";
+const appDiv = document.getElementById("app");
 
-const handleLogin = async (event) => {
-  event.preventDefault();
-  const userData = Object.fromEntries(new FormData(event.target));
+const router = () => {
+  const path = window.location.pathname;
 
-  try {
-    const response = await fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-      credentials: "include",
-    });
+  const routes = [{ path: "/", view: renderHome }];
 
-    const data = await response.json();
-    console.log("Serwer odpowiedział:", data);
+  const route = routes.find((route) => route.path === path);
 
-    // Zapis tokena do pamięci przeglądarki, jeśli istnieje
-  } catch (err) {
-    console.log("Błąd z frontendu:", err.message);
+  if (route) {
+    appDiv.innerHTML = route.view();
+  } else {
+    appDiv.innerHTML = renderHome();
   }
 };
 
-// Podpięcie referencji do funkcji (bez nawiasów!)
-form.addEventListener("submit", handleLogin);
+// Globalny nasłuchiwacz kliknięć
+document.addEventListener("click", (event) => {
+  // Szukamy najbliższego linku (<a>) w hierarchii DOM
+  const targetLink = event.target.closest("a");
 
-const registerForm = document.querySelector("#register-form");
+  if (targetLink) {
+    // 1. Zablokuj domyślne przeładowanie strony
+    event.preventDefault();
 
-const handleRegister = async (event) => {
-  event.preventDefault();
-  const userData = Object.fromEntries(new FormData(event.target));
-  try {
-    const response = await fetch("http://localhost:3000/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-      credentials: "include",
-    });
-    const data = await response.json();
-    console.log(data);
-  } catch (err) {
-    console.log(err);
+    // 2. Pobierz ścieżkę z linku i zmień adres URL bez przeładowania
+    const path = targetLink.getAttribute("href");
+    window.history.pushState(null, null, path);
+
+    // 3. Wywołaj router ręcznie, aby zaktualizował widok
+    router();
   }
-};
+});
 
-registerForm.addEventListener("submit", handleRegister);
+document.addEventListener("DOMContentLoaded", () => {
+  router();
+});
 
-const fetchProfile = async () => {
-  try {
-    const response = await fetch("http://localhost:3000/profile", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    const data = await response.json();
-    console.log("Dane profilu:", data);
-  } catch (err) {
-    console.log("Błąd podczas pobierania profilu:", err.message);
-  }
-};
+document.addEventListener("submit", async (event) => {
+  if (event.target.id === "search-form") {
+    event.preventDefault();
 
-document
-  .querySelector("#fetch-profile")
-  .addEventListener("click", fetchProfile);
+    const title = event.target.querySelector("#search-input").value;
 
-const logoutBtn = document.querySelector("#logout-btn");
+    try {
+      // Wysyłamy zapytanie do serwera (zmień adres na swój, np. localhost:3000)
+      const response = await fetch(
+        `http://localhost:3000/book?title=${encodeURIComponent(title)}`,
+      );
 
-const handleLogout = async (event) => {
-  try {
-    const response = await fetch("http://localhost:3000/auth/logout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-  } catch (err) {
-    console.log("Błąd podczas wylogowywania:", err.message);
-  }
-};
+      if (!response.ok) throw new Error("Błąd sieci");
 
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", handleLogout);
-}
+      const data = await response.json();
+      console.log("Wyniki wyszukiwania:", data);
 
-const updateEmailonFrontend = async (newEmailValue) => {
-  try {
-    const response = await fetch("http://localhost:3000/profile/email", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ email: newEmailValue }),
-    });
-    const data = await response.json();
-    console.log("Odpowiedź z serwera:", data);
-  } catch (err) {
-    console.log("Błąd podczas aktualizacji emaila:", err.message);
-  }
-};
-
-const updateEmailBtn = document.querySelector("#update-email-btn");
-const newEmailInput = document.querySelector("#new-email");
-
-if (updateEmailBtn && newEmailInput) {
-  updateEmailBtn.addEventListener("click", () => {
-    updateEmailonFrontend(newEmailInput.value);
-  });
-}
-
-const deleteProfileBtn = document.querySelector("#delete-profile-btn");
-const passwordInput = document.querySelector("#password");
-const passwordVerifyInput = document.querySelector("#password-verify");
-
-const deleteProfileonFontend = async (passwordInput) => {
-  try {
-    const response = await fetch("http://localhost:3000/profile/delete", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ password: passwordInput }),
-    });
-    const data = await response.json();
-    console.log("Odpowiedź z serwera:", data);
-  } catch (err) {
-    console.log("Błąd podczas usuwania profilu:", err.message);
-  }
-};
-
-if (deleteProfileBtn) {
-  deleteProfileBtn.addEventListener("click", () => {
-    const password = passwordInput.value;
-    const passwordVerify = passwordVerifyInput.value;
-    if (password === passwordVerify) {
-      deleteProfileonFontend(password);
-    } else {
-      console.log("Hasła nie są takie same");
+      // Tutaj w następnym kroku wstrzykniemy wyniki do HTML
+    } catch (err) {
+      console.error("Błąd:", err);
     }
-  });
-}
+  }
+});

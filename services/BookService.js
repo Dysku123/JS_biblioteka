@@ -162,6 +162,10 @@ const processReturn = async (userId, id) => {
   }
 };
 
+const getBookByTitle = async (title) => {
+  return await findBookByTitle(title);
+}
+
 // Zmieniono eksport getBookByTitle na getBookById
 module.exports = {
   addNewBook,
@@ -176,4 +180,5 @@ module.exports = {
   processReturn,
   removeBook,
   getAllBorrowings,
+  getBookByTitle
 };

@@ -11,6 +11,7 @@ const {
   processReturn,
   removeBook,
   getAllBorrowings,
+  getBookByTitle
 } = require("../services/BookService");
 const AppError = require("../errors/AppError");
 
@@ -55,13 +56,18 @@ const deleteBook = async (req, res, next) => {
 
 const showAllBooks = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, title } = req.query;
+    let books;
 
-    const books = await getAllBooks(page, limit);
+    if (title) {
+      const book = await getBookByTitle(title);
+      // Jeśli książka istnieje, pakujemy ją w tablicę. Jeśli nie, zwracamy pustą tablicę.
+      books = book ? [book] : []; 
+    } else {
+      books = await getAllBooks(page, limit);
+    }
 
-    return res.status(200).json({
-      books,
-    });
+    return res.status(200).json({ books });
   } catch (err) {
     next(err);
   }
@@ -215,6 +221,23 @@ const returnallBorrowings = async (req, res, next) => {
   }
 };
 
+const fetchBookByTitle = async (req, res, next) =>{
+  const title = req.query.title;
+  try {
+    const book = await getBookByTitle(title);
+    if (!book) {
+      return res.status(404).json({
+        message: "Nie znaleziono książki o podanym tytule",
+      });
+    }
+    return res.status(200).json({
+      book,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   addBook,
   showAllBooks,
@@ -228,4 +251,5 @@ module.exports = {
   returnBook,
   returnallBorrowings,
   deleteBook,
+  fetchBookByTitle
 };

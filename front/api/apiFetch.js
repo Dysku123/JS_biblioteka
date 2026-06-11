@@ -1,0 +1,38 @@
+async function apiFetch(url, options = {}) {
+  //przyjmuje url np prodile i options jak get/post etc
+  let response = await fetch(`http://localhost:3000${url}`, {
+    //tutaj nam wkleja do linku to url, na ktore chcemy wejsc
+    ...options, //rozpakowuje options, czyli np method: "GET" i inne rzeczy ktore tam damy
+    credentials: "include", // ciasteczka
+    headers: { "Content-Type": "application/json", ...options.headers }, // dajemy mozliwosc nadpisania standardowego application/json na cos innego
+  });
+
+  if (response.status === 401) {
+    // jezeli token wygasł wchodzi tutaj
+    // Spróbuj odświeżyć token
+    const refresh = await fetch("http://localhost:3000/auth/refresh-token", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (refresh.ok) {
+      // jezeli uda sie odswiezyc, znowu wchodzi na ten sam url
+      // Ponów oryginalny request
+      response = await fetch(`http://localhost:3000${url}`, {
+        ...options,
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...options.headers },
+      });
+    } else {
+      // Token wygasł na dobre — wyloguj
+      window.location.href = "/login"; //jezeli nie udalo sie odswiezyc ciasteczka, wracamy na login
+      return;
+    }
+  }
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Błąd zapytania do API");
+  }
+
+  return response.json();
+}
+export { apiFetch };

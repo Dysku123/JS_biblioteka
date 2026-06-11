@@ -3,9 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
-
 const { poloczZBaza } = require("./config/db");
-
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const bookRoutes = require("./routes/bookRoutes");
@@ -14,12 +12,13 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 
 // 1. Globalne middleware (Zabezpieczenia i parsery danych)
-app.use(helmet());
+//app.use(helmet());
+console.log("DEBUG FRONTEND_URL:", process.env.FRONTEND_URL);
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://127.0.0.1:3001",
+    origin: ["http://localhost", "http://127.0.0.1", "http://localhost:3000"],
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(express.json());
