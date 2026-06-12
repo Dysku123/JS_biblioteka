@@ -11,7 +11,6 @@ const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
-// 1. Globalne middleware (Zabezpieczenia i parsery danych)
 //app.use(helmet());
 console.log("DEBUG FRONTEND_URL:", process.env.FRONTEND_URL);
 app.use(
@@ -29,7 +28,6 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-// 2. Routing (Definicje ścieżek dostępu)
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/book", bookRoutes);
@@ -39,7 +37,6 @@ app.get("/", (req, res) => {
   res.send("witaj na stronie głównej");
 });
 
-// 3. Globalna obsługa błędów (Siatka bezpieczeństwa)
 app.use((err, req, res, next) => {
   console.error(`error next ${err.message}`);
   res.status(err.statusCode || 500).json({
@@ -47,7 +44,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 4. Uruchomienie połączenia z bazą i start serwera (Silnik)
 poloczZBaza()
   .then(() => {
     app.listen(3000, () => {

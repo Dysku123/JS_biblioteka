@@ -1,12 +1,11 @@
-/* ===== Paleta (spokojna, "biblioteczna") ===== */
 :root {
-  --tlo: #f4efe6; /* pergamin */
-  --karta: #fbf8f2; /* jaśniejszy pergamin na karty */
-  --tekst: #33302b; /* ciepła czerń */
-  --akcent: #4a6b52; /* stonowana zieleń */
-  --akcent-ciemny: #3a5441; /* zieleń hover */
-  --ramka: #d8cfc0; /* miękka ramka */
-  --danger: #9b4a3a; /* przygaszona ceglana czerwień */
+  --tlo: #f4efe6;
+  --karta: #fbf8f2;
+  --tekst: #33302b;
+  --akcent: #4a6b52;
+  --akcent-ciemny: #3a5441;
+  --ramka: #d8cfc0;
+  --danger: #9b4a3a;
   --danger-ciemny: #823c2f;
 }
 
@@ -25,7 +24,7 @@ body {
 h1,
 h2,
 h3 {
-  font-family: Georgia, "Times New Roman", serif; /* nuta książkowości */
+  font-family: Georgia, "Times New Roman", serif;
   color: var(--akcent-ciemny);
 }
 
@@ -33,7 +32,6 @@ a {
   color: var(--akcent);
 }
 
-/* ===== Nawigacja ===== */
 .menu {
   display: flex;
   align-items: center;
@@ -74,7 +72,6 @@ a {
   background-color: #fff;
 }
 
-/* ===== Widoki jako karty (każda sekcja wstrzykiwana do #app) ===== */
 #app > section,
 #app > p {
   max-width: 900px;
@@ -83,10 +80,9 @@ a {
   background-color: var(--karta);
   border: 1px solid var(--ramka);
   border-radius: 6px;
-  overflow-x: auto; /* szeroka tabela przewija się w karcie zamiast wychodzić poza */
+  overflow-x: auto; 
 }
 
-/* ===== Tabele ===== */
 table {
   border-collapse: collapse;
   width: 100%;
@@ -106,7 +102,6 @@ tbody tr:nth-child(even) {
   background-color: #f2ece1;
 }
 
-/* ===== Przyciski ===== */
 button {
   background-color: var(--akcent);
   color: #fff;
@@ -131,7 +126,6 @@ button:disabled {
   background-color: var(--danger-ciemny);
 }
 
-/* ===== Pola formularzy ===== */
 input,
 select {
   padding: 0.45rem 0.6rem;
@@ -158,7 +152,6 @@ select {
   width: 100%;
 }
 
-/* ===== Paski akcji (zakładki, wyszukiwarka, paginacja, wypożyczenie) ===== */
 .zakladki,
 .wyszukiwarka,
 .paginacja,
@@ -176,7 +169,6 @@ select {
   font-weight: bold;
 }
 
-/* ===== Komunikaty ===== */
 .komunikat {
   padding: 0.6rem 0.9rem;
   border-radius: 4px;
@@ -199,7 +191,6 @@ select {
   color: var(--danger);
 }
 
-/* ===== Akcje w tabelach (Edytuj / Usuń) ===== */
 .btn-edytuj,
 .btn-usun {
   display: inline-block;
@@ -213,7 +204,7 @@ select {
   cursor: pointer;
 }
 .btn-edytuj {
-  background-color: #c9952f; /* musztardowy żółty - widoczny, ale ciepły */
+  background-color: #c9952f;
   color: #2e2a1f;
 }
 .btn-edytuj:hover {
@@ -231,7 +222,6 @@ select {
   cursor: not-allowed;
 }
 
-/* ===== Szczegóły książki ===== */
 .widok-ksiazka p {
   margin: 0.35rem 0;
 }
@@ -241,7 +231,6 @@ select {
   border-top: 1px solid var(--ramka);
 }
 
-/* ===== Strona główna (hero) ===== */
 .widok-home {
   text-align: center;
 }

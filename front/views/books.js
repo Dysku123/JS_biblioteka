@@ -7,12 +7,9 @@ let endpoint = "/book"; // "/book" = wszystkie, "/book/available" = dostępne
 let stronicowanie = true; // czy pokazywać przyciski stron (przy wyszukiwaniu = false)
 let listaUser = null;
 
-// Pomocnik: przeładowuje cały widok przez router (z menu), zachowując stan modułu
 const odswiez = async () => {
   await window.router();
 };
-
-// --- Akcje przycisków (globalne, żeby onclick w HTML je widział) ---
 window.zmienStrone = async (kierunek) => {
   strona = strona + kierunek;
   if (strona < 1) strona = 1;
@@ -69,7 +66,6 @@ export const szukajZGlownej = (typ, tekst) => {
   strona = 1;
 };
 
-// --- Widok ---
 export const renderBooks = async (user) => {
   if (user !== undefined) listaUser = user; // z routera przychodzi user; z odswiez() - undefined, więc zostaje stary
   const staff =
@@ -85,7 +81,6 @@ export const renderBooks = async (user) => {
       (k) => `<option value="${k}">${k}</option>`,
     ).join("");
 
-    // Wiersze tabeli
     const wiersze = books
       .map(
         (k) => `
@@ -100,7 +95,6 @@ export const renderBooks = async (user) => {
       )
       .join("");
 
-    // Paginacja tylko gdy nie szukamy
     const paginacja = stronicowanie
       ? `
         <div class="paginacja">

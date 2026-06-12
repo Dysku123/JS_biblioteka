@@ -5,8 +5,6 @@ export const pokazKomunikat = (tekst, typ) => {
   box.className = "komunikat " + typ;
 };
 
-// Zamienia groźne znaki na encje HTML - chroni przed XSS przy wstrzykiwaniu
-// danych z bazy/od użytkownika do innerHTML przez ${...}.
 export const escapeHTML = (str) => {
   if (str === null || str === undefined) return "";
   return String(str).replace(

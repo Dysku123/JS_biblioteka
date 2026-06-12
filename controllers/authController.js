@@ -64,12 +64,10 @@ const register = async (req, res, next) => {
     const firstAdminEmail = process.env.FIRST_ADMIN_EMAIL;
     let assignedRole = "user"; // Domyślna rola dla każdego nowego konta
 
-    // Jeśli w .env zdefiniowano maila admina i zgadza się on z mailem z formularza
     if (firstAdminEmail && user_email === firstAdminEmail) {
       assignedRole = "admin";
     }
 
-    // Przekazujemy wyliczoną rolę do warstwy serwisu
     await registerUser(user_email, user_password, assignedRole);
 
     res.status(201).json({

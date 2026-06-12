@@ -40,7 +40,6 @@ const router = async () => {
   }
 
   if (sciezka.startsWith("/books/")) {
-    //do wyszukiwanie dynamicznie po ID
     const id = sciezka.split("/")[2];
     appDiv.innerHTML = renderNav(user) + (await renderBookDetail(id, user));
     return;

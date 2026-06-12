@@ -37,7 +37,6 @@ const addNewBook = async (
   pages,
   totalCopies,
 ) => {
-  // Tutaj nadal używamy title, bo sprawdzamy czy taki tekst (tytuł) już jest w bazie
   const book = await findBookByTitle(title);
   if (book) {
     return await increaseBookStockById(book._id, totalCopies);
@@ -104,8 +103,6 @@ const getAllBorrowings = async (page, limit) => {
   const skip = (parsedPage - 1) * parsedLimit;
   const borrowings = await fetchAllBorrowings(parsedLimit, skip);
 
-  // Dołączamy tytuł książki i email użytkownika, żeby front pokazał czytelnie
-  // (nie ma osobnego endpointu "user po ID", więc robimy to tutaj).
   const wynik = [];
   for (const b of borrowings) {
     const ksiazka = await findBookById(b.bookId);
@@ -167,7 +164,6 @@ const getBookByTitle = async (title) => {
   return await findBookByTitle(title);
 }
 
-// Zmieniono eksport getBookByTitle na getBookById
 module.exports = {
   addNewBook,
   getAllBooks,

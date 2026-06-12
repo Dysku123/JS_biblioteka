@@ -10,7 +10,6 @@ const {
 const { verifyToken } = require("../middleware/auth");
 const validateBody = require("../middleware/validateBody");
 
-// Schematy walidacji body (blokują m.in. NoSQL injection - wymuszają string)
 const emailSchema = Joi.object({
   email: Joi.string().email().required(),
 });

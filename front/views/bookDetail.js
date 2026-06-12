@@ -1,7 +1,6 @@
 import { apiFetch } from "../api/apiFetch.js";
 import { pokazKomunikat, escapeHTML } from "../ui.js";
 
-// wypożyczenie (globalne, bo onclick)
 window.wypozycz = async (id) => {
   const pole = document.getElementById("ile-egz");
   let ile = Number(pole.value);
@@ -17,7 +16,6 @@ window.wypozycz = async (id) => {
   } catch (err) {
     pokazKomunikat(err.message, "blad");
   }
-  // chwila na przeczytanie komunikatu, potem przeładowanie ze świeżym stanem
   setTimeout(() => window.router(), 1000);
 };
 
@@ -40,7 +38,6 @@ export const renderBookDetail = async (id, user) => {
     const data = await apiFetch(`/book/${id}`);
     const k = data.book;
 
-    // Czy zalogowany user ma tę książkę aktualnie wypożyczoną? (decyduje o guziku "Zwróć")
     let maWypozyczona = false;
     if (user) {
       try {
@@ -49,11 +46,9 @@ export const renderBookDetail = async (id, user) => {
           (w) => String(w.bookId) === String(id) && w.isOpen,
         );
       } catch (err) {
-        // brak danych o wypożyczeniach - zostaje false
       }
     }
 
-    // Przyciski tylko dla zalogowanych
     let akcje = "";
     if (user) {
       const brakEgz = k.availableCopies === 0;

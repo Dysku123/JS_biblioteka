@@ -1,7 +1,5 @@
 async function apiFetch(url, options = {}) {
-  //przyjmuje url np prodile i options jak get/post etc
   let response = await fetch(`http://localhost:3000${url}`, {
-    //tutaj nam wkleja do linku to url, na ktore chcemy wejsc
     ...options, //rozpakowuje options, czyli np method: "GET" i inne rzeczy ktore tam damy
     credentials: "include", // ciasteczka
     headers: { "Content-Type": "application/json", ...options.headers }, // dajemy mozliwosc nadpisania standardowego application/json na cos innego

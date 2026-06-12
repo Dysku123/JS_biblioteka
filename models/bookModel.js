@@ -22,7 +22,6 @@ const createBook = async (
   });
 };
 
-// Zostawiamy do weryfikacji przy dodawaniu nowej książki
 const findBookByTitle = async (title, session) => {
   return await booksCollection.findOne(
     { title, isDeleted: false },
@@ -30,7 +29,6 @@ const findBookByTitle = async (title, session) => {
   );
 };
 
-// NOWA FUNKCJA: Wyszukiwanie po systemowym ID
 const findBookById = async (id, session) => {
   return await booksCollection.findOne(
     { _id: new ObjectId(id), isDeleted: false },

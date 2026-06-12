@@ -32,7 +32,6 @@ export const renderAdminUsers = async (user) => {
 
     let wiersze = "";
     for (const u of users) {
-      // opcje roli z zaznaczoną obecną
       const opcje = ROLE.map(
         (r) =>
           `<option value="${r}" ${r === u.role ? "selected" : ""}>${r}</option>`,

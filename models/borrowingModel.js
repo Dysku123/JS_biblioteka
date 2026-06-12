@@ -55,7 +55,6 @@ const closeBorrowing = async (userId, bookId, session) => {
   );
 };
 
-// Czy KTOKOLWIEK ma tę książkę aktualnie wypożyczoną (otwarte wypożyczenie)?
 const hasOpenBorrowingForBook = async (bookId) => {
   const found = await borrowingsCollection.findOne({
     bookId: new ObjectId(bookId),
@@ -85,7 +84,6 @@ const hasOverdueBooks = async (userId) => {
     isOpen: true,
     dueDate: { $lt: now },
   });
-  // Zwracamy true jeśli znaleziono zaległe wypożyczenie, false w przeciwnym razie
   return !!overdue; 
 };
 

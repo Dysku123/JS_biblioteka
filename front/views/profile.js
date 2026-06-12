@@ -28,19 +28,17 @@ window.usunKonto = async () => {
       method: "DELETE",
       body: JSON.stringify({ password: haslo }),
     });
-    // konto usunięte -> czyścimy sesję i na rejestrację
     await fetch("http://localhost:3000/auth/logout", {
       method: "POST",
       credentials: "include",
     });
     location.hash = "/register";
   } catch (err) {
-    pokazKomunikat(err.message, "blad"); // np. "niepoprawne hasło"
+    pokazKomunikat(err.message, "blad"); 
   }
 };
 
 export const renderProfile = async (user) => {
-  // --- Moje wypożyczenia ---
   let mojeHtml = "";
   try {
     const data = await apiFetch("/profile/mybooks");
@@ -51,15 +49,12 @@ export const renderProfile = async (user) => {
     } else {
       let wiersze = "";
       for (const w of mybooks) {
-        // mybooks ma tylko bookId - dociągamy tytuł osobnym zapytaniem
         let tytul = w.bookId;
         try {
           const b = await apiFetch(`/book/${w.bookId}`);
           tytul = b.book.title;
         } catch (e) {
-          // jak się nie uda, zostaje bookId
         }
-        // ile dni zostało; ujemne = spóźniona; dla zwróconych nie pokazujemy
         let pozostalo = "—";
         if (w.isOpen) {
           pozostalo =
