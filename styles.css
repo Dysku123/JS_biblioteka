@@ -1,0 +1,258 @@
+/* ===== Paleta (spokojna, "biblioteczna") ===== */
+:root {
+  --tlo: #f4efe6; /* pergamin */
+  --karta: #fbf8f2; /* jaśniejszy pergamin na karty */
+  --tekst: #33302b; /* ciepła czerń */
+  --akcent: #4a6b52; /* stonowana zieleń */
+  --akcent-ciemny: #3a5441; /* zieleń hover */
+  --ramka: #d8cfc0; /* miękka ramka */
+  --danger: #9b4a3a; /* przygaszona ceglana czerwień */
+  --danger-ciemny: #823c2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--tlo);
+  color: var(--tekst);
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3 {
+  font-family: Georgia, "Times New Roman", serif; /* nuta książkowości */
+  color: var(--akcent-ciemny);
+}
+
+a {
+  color: var(--akcent);
+}
+
+/* ===== Nawigacja ===== */
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background-color: var(--akcent);
+  padding: 0.75rem 1.5rem;
+}
+.menu .logo {
+  font-family: Georgia, serif;
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #fff;
+  text-decoration: none;
+}
+.menu-linki {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.menu a {
+  color: #f4efe6;
+  text-decoration: none;
+}
+.menu a:hover {
+  text-decoration: underline;
+}
+.menu .logo:hover {
+  text-decoration: none; /* logo nigdy nie podkreślone */
+}
+.menu button {
+  background-color: var(--karta);
+  color: var(--akcent-ciemny);
+}
+.menu button:hover {
+  background-color: #fff;
+}
+
+/* ===== Widoki jako karty (każda sekcja wstrzykiwana do #app) ===== */
+#app > section,
+#app > p {
+  max-width: 900px;
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  background-color: var(--karta);
+  border: 1px solid var(--ramka);
+  border-radius: 6px;
+  overflow-x: auto; /* szeroka tabela przewija się w karcie zamiast wychodzić poza */
+}
+
+/* ===== Tabele ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1rem;
+}
+th,
+td {
+  border: 1px solid var(--ramka);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+thead {
+  background-color: var(--akcent);
+  color: #fff;
+}
+tbody tr:nth-child(even) {
+  background-color: #f2ece1;
+}
+
+/* ===== Przyciski ===== */
+button {
+  background-color: var(--akcent);
+  color: #fff;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+button:hover {
+  background-color: var(--akcent-ciemny);
+}
+button:disabled {
+  background-color: #b8b0a2;
+  cursor: not-allowed;
+}
+.btn-danger {
+  background-color: var(--danger);
+}
+.btn-danger:hover {
+  background-color: var(--danger-ciemny);
+}
+
+/* ===== Pola formularzy ===== */
+input,
+select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--ramka);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background-color: #fff;
+}
+.pole {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  max-width: 360px;
+}
+.pole label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--akcent-ciemny);
+}
+.pole input,
+.pole select {
+  width: 100%;
+}
+
+/* ===== Paski akcji (zakładki, wyszukiwarka, paginacja, wypożyczenie) ===== */
+.zakladki,
+.wyszukiwarka,
+.paginacja,
+.wypozyczenie {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.paginacja {
+  margin-top: 1rem;
+}
+.paginacja-numer {
+  font-weight: bold;
+}
+
+/* ===== Komunikaty ===== */
+.komunikat {
+  padding: 0.6rem 0.9rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+.komunikat:empty {
+  display: none; /* pusty komunikat nie zostawia ramki */
+}
+.komunikat.sukces {
+  background-color: #e3efe3;
+  color: #2f5d3a;
+  border: 1px solid #b6d7b6;
+}
+.komunikat.blad {
+  background-color: #f4e0db;
+  color: var(--danger-ciemny);
+  border: 1px solid #e0b8ae;
+}
+.blad {
+  color: var(--danger);
+}
+
+/* ===== Akcje w tabelach (Edytuj / Usuń) ===== */
+.btn-edytuj,
+.btn-usun {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  margin-right: 0.4rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn-edytuj {
+  background-color: #c9952f; /* musztardowy żółty - widoczny, ale ciepły */
+  color: #2e2a1f;
+}
+.btn-edytuj:hover {
+  background-color: #b5842a;
+}
+.btn-usun {
+  background-color: var(--danger);
+  color: #fff;
+}
+.btn-usun:hover {
+  background-color: var(--danger-ciemny);
+}
+.btn-usun:disabled {
+  background-color: #b8b0a2;
+  cursor: not-allowed;
+}
+
+/* ===== Szczegóły książki ===== */
+.widok-ksiazka p {
+  margin: 0.35rem 0;
+}
+.wypozyczenie {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ramka);
+}
+
+/* ===== Strona główna (hero) ===== */
+.widok-home {
+  text-align: center;
+}
+.widok-home form {
+  display: flex; /* blok -> link ląduje pod spodem */
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem auto;
+}
+.widok-home a {
+  display: inline-block;
+  margin-top: 0.5rem;
+}

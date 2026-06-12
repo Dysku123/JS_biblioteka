@@ -28,12 +28,12 @@ const login = async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true, // Ustawienie secure na true wymaga HTTPS
+      secure: false, // Ustawienie secure na true wymaga HTTPS
       sameSite: "strict", // Zapobiega wysyłaniu ciasteczka w żądaniach cross-site
     });
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "strict",
     });
 
@@ -101,7 +101,7 @@ const refreshToken = (req, res, next) => {
     });
     res.cookie("accessToken", newToken, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "strict",
     });
     res.status(200).json({

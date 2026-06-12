@@ -55,6 +55,21 @@ const closeBorrowing = async (userId, bookId, session) => {
   );
 };
 
+// Czy KTOKOLWIEK ma tę książkę aktualnie wypożyczoną (otwarte wypożyczenie)?
+const hasOpenBorrowingForBook = async (bookId) => {
+  const found = await borrowingsCollection.findOne({
+    bookId: new ObjectId(bookId),
+    isOpen: true,
+  });
+  return !!found;
+};
+
+const fetchBorrowingsByUserId = async (userId) => {
+  return await borrowingsCollection
+    .find({ userId: new ObjectId(userId) })
+    .toArray();
+};
+
 const fetchAllBorrowings = async (limit, skip) => {
   return await borrowingsCollection
     .find({})
@@ -80,5 +95,7 @@ module.exports = {
   findBorrowedBooks,
   closeBorrowing,
   fetchAllBorrowings,
+  fetchBorrowingsByUserId,
+  hasOpenBorrowingForBook,
   hasOverdueBooks,
 };

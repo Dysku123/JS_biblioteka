@@ -16,8 +16,6 @@ const {
 } = require("../controllers/bookController");
 const { verifyToken, isLibrarian, isAdmin } = require("../middleware/auth");
 
-router.use(verifyToken);
-
 // --- TRASY POST / PUT / DELETE ---
 router.post("/add", verifyToken, isLibrarian, addBook);
 router.put("/:id", verifyToken, isLibrarian, editBookDetails);

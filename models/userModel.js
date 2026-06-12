@@ -15,7 +15,8 @@ const registerEmailDuplicate = async (email) => {
 };
 
 const getAllUsers = async () => {
-  return await usersCollection.find({ isActive: true }).toArray();
+  // isActive !== false: łapie też stare konta bez tego pola; pomija tylko usunięte (isActive:false)
+  return await usersCollection.find({ isActive: { $ne: false } }).toArray();
 };
 
 const createUser = async (email, password, role) => {

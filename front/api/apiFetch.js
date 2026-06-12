@@ -22,10 +22,6 @@ async function apiFetch(url, options = {}) {
         credentials: "include",
         headers: { "Content-Type": "application/json", ...options.headers },
       });
-    } else {
-      // Token wygasł na dobre — wyloguj
-      window.location.href = "/login"; //jezeli nie udalo sie odswiezyc ciasteczka, wracamy na login
-      return;
     }
   }
   if (!response.ok) {
@@ -35,4 +31,13 @@ async function apiFetch(url, options = {}) {
 
   return response.json();
 }
+
+export const getMe = async () => {
+  try {
+    const data = await apiFetch("/profile");
+    return data.user;
+  } catch (err) {
+    return null;
+  }
+};
 export { apiFetch };

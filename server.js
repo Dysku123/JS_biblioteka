@@ -16,7 +16,13 @@ const app = express();
 console.log("DEBUG FRONTEND_URL:", process.env.FRONTEND_URL);
 app.use(
   cors({
-    origin: ["http://localhost", "http://127.0.0.1", "http://localhost:3000"],
+    origin: [
+      "http://localhost",
+      "http://127.0.0.1",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:3001",
+    ],
     credentials: true,
   }),
 );

@@ -22,8 +22,10 @@ const {
   closeBorrowing,
   fetchAllBorrowings,
   hasOverdueBooks,
+  hasOpenBorrowingForBook,
 } = require("../models/borrowingModel");
 
+const { findUserById } = require("../models/userModel");
 const AppError = require("../errors/AppError");
 const { client } = require("../config/db");
 
@@ -78,6 +80,13 @@ const removeBook = async (id) => {
   if (!book) {
     throw new AppError("książka nie istnieje", 404);
   }
+  const wypozyczona = await hasOpenBorrowingForBook(id);
+  if (wypozyczona) {
+    throw new AppError(
+      "Nie można usunąć książki — jest aktualnie wypożyczona",
+      400,
+    );
+  }
   await deleteBookById(id);
 };
 
@@ -93,7 +102,21 @@ const getAllBorrowings = async (page, limit) => {
   const parsedPage = Math.max(1, parseInt(page) || 1);
   const parsedLimit = Math.max(1, parseInt(limit) || 10);
   const skip = (parsedPage - 1) * parsedLimit;
-  return await fetchAllBorrowings(parsedLimit, skip);
+  const borrowings = await fetchAllBorrowings(parsedLimit, skip);
+
+  // Dołączamy tytuł książki i email użytkownika, żeby front pokazał czytelnie
+  // (nie ma osobnego endpointu "user po ID", więc robimy to tutaj).
+  const wynik = [];
+  for (const b of borrowings) {
+    const ksiazka = await findBookById(b.bookId);
+    const uzytkownik = await findUserById(b.userId);
+    wynik.push({
+      ...b,
+      bookTitle: ksiazka ? ksiazka.title : null,
+      userEmail: uzytkownik ? uzytkownik.email : null,
+    });
+  }
+  return wynik;
 };
 
 const processBorrowing = async (id, amount, userId) => {
@@ -101,65 +124,43 @@ const processBorrowing = async (id, amount, userId) => {
   if (hasOverdue) {
     throw new AppError("nie można wypożyczyć książki, masz zaległe zwroty", 400);
   }
-  const session = client.startSession();
-  try {
-    session.startTransaction();
-    const book = await findBookById(id, session);
-    if (!book) {
-      throw new AppError("książka nie istnieje", 404);
-    }
 
-    if (amount > book.availableCopies) {
-      throw new AppError("za mało książek na stanie, nie można wypożyczyć", 400);
-    }
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 30);
-
-    await borrowABookById(id, amount, session);
-    // Przekazujemy id książki zamiast tytułu
-    await registerBorrowing(userId, id, dueDate, amount, session);
-
-    await session.commitTransaction();
-    return dueDate;
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    await session.endSession();
+  const book = await findBookById(id);
+  if (!book) {
+    throw new AppError("książka nie istnieje", 404);
   }
+  if (amount > book.availableCopies) {
+    throw new AppError("za mało książek na stanie, nie można wypożyczyć", 400);
+  }
+
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 30);
+
+  await borrowABookById(id, amount);
+  await registerBorrowing(userId, id, dueDate, amount);
+
+  return dueDate;
 };
 
 const processReturn = async (userId, id) => {
-  const session = client.startSession();
-  try {
-    session.startTransaction();
-
-    const borrowedbooks = await findBorrowedBooks(userId, id, session);
-    if (!borrowedbooks) {
-      throw new AppError("nie ma takiego wypozyczenia", 404);
-    }
-
-    const now = new Date();
-    let isLate = false;
-
-    if (now > borrowedbooks.dueDate) {
-      isLate = true;
-    }
-
-    await registerReturn(userId, id, session);
-    await returnBookToStockById(id, session);
-    if (borrowedbooks.returnedAmount + 1 === borrowedbooks.borrowedAmount) {
-      await closeBorrowing(userId, id, session);
-    }
-    await session.commitTransaction();
-
-    return isLate;
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    await session.endSession();
+  const borrowedbooks = await findBorrowedBooks(userId, id);
+  if (!borrowedbooks) {
+    throw new AppError("nie ma takiego wypozyczenia", 404);
   }
+
+  const now = new Date();
+  let isLate = false;
+  if (now > borrowedbooks.dueDate) {
+    isLate = true;
+  }
+
+  await registerReturn(userId, id);
+  await returnBookToStockById(id);
+  if (borrowedbooks.returnedAmount + 1 === borrowedbooks.borrowedAmount) {
+    await closeBorrowing(userId, id);
+  }
+
+  return isLate;
 };
 
 const getBookByTitle = async (title) => {
